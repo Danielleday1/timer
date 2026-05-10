@@ -1,0 +1,492 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>可爱计时器小工具</title>
+    <style>
+:root {
+  --bg: #fff8ef;
+  --bg-accent: #ffe0cf;
+  --card: rgba(255, 255, 255, 0.78);
+  --card-strong: rgba(255, 250, 244, 0.95);
+  --line: rgba(161, 104, 76, 0.14);
+  --text: #5c3b2e;
+  --muted: #8d6f61;
+  --pink: #ffb6b2;
+  --peach: #ffd6a8;
+  --butter: #fff0a8;
+  --mint: #ccefdc;
+  --sky: #d5eaff;
+  --coral: #f77f6b;
+  --shadow: 0 20px 45px rgba(210, 148, 111, 0.18);
+}
+
+* { box-sizing: border-box; }
+html, body { margin: 0; min-height: 100%; }
+body {
+  font-family: "Avenir Next", "Hiragino Maru Gothic ProN", "PingFang TC", "Microsoft JhengHei", sans-serif;
+  color: var(--text);
+  background:
+    radial-gradient(circle at top left, rgba(255, 214, 168, 0.7), transparent 28%),
+    radial-gradient(circle at 85% 18%, rgba(213, 234, 255, 0.8), transparent 22%),
+    linear-gradient(180deg, #fff9f3 0%, #fff3ea 100%);
+}
+button, input, textarea, select { font: inherit; }
+.page-shell { width: min(1180px, calc(100% - 32px)); margin: 0 auto; padding: 32px 0 48px; }
+.hero {
+  display: grid;
+  grid-template-columns: minmax(0, 1.15fr) minmax(280px, 0.85fr);
+  gap: 28px;
+  align-items: center;
+  padding: 30px;
+  border-radius: 36px;
+  background:
+    linear-gradient(135deg, rgba(255, 255, 255, 0.72), rgba(255, 247, 237, 0.92)),
+    linear-gradient(135deg, rgba(255, 214, 168, 0.25), rgba(204, 239, 220, 0.2));
+  border: 1px solid rgba(255, 255, 255, 0.7);
+  box-shadow: var(--shadow);
+  overflow: hidden;
+  position: relative;
+}
+.hero::after {
+  content: "";
+  position: absolute;
+  inset: auto -80px -120px auto;
+  width: 250px;
+  height: 250px;
+  background: rgba(255, 214, 168, 0.28);
+  border-radius: 50%;
+  filter: blur(4px);
+}
+.eyebrow, .section-label, .category-kicker {
+  margin: 0 0 10px;
+  font-size: 0.78rem;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: #cf7d66;
+}
+.hero h1, .section-heading h2, .panel-header h2, .category-card h3 { margin: 0; line-height: 1.08; }
+.hero h1 { max-width: 10ch; font-size: clamp(2.35rem, 6vw, 4.8rem); }
+.hero-text, .section-text, .category-description, .timer-note, .timer-label { color: var(--muted); }
+.hero-text { max-width: 48ch; margin: 16px 0 0; font-size: 1rem; line-height: 1.75; }
+.status-pill {
+  padding: 10px 14px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.9);
+  border: 1px solid rgba(214, 161, 136, 0.2);
+  box-shadow: 0 10px 24px rgba(228, 188, 167, 0.18);
+}
+.hero-art {
+  min-height: 300px;
+  position: relative;
+  border-radius: 28px;
+  overflow: hidden;
+  background:
+    linear-gradient(180deg, rgba(167, 224, 255, 0.92) 0%, rgba(219, 243, 255, 0.95) 66%, rgba(194, 232, 183, 0.95) 66%, rgba(220, 244, 201, 0.98) 100%);
+}
+.hero-art::after {
+  content: "";
+  position: absolute;
+  inset: auto 0 18px 0;
+  height: 24px;
+  background:
+    radial-gradient(circle at 14px 14px, rgba(114, 177, 104, 0.85) 0 2px, transparent 3px),
+    radial-gradient(circle at 88px 8px, rgba(114, 177, 104, 0.75) 0 2px, transparent 3px),
+    radial-gradient(circle at 156px 14px, rgba(114, 177, 104, 0.8) 0 2px, transparent 3px),
+    radial-gradient(circle at 238px 8px, rgba(114, 177, 104, 0.75) 0 2px, transparent 3px),
+    radial-gradient(circle at 316px 14px, rgba(114, 177, 104, 0.75) 0 2px, transparent 3px);
+}
+.mascot {
+  position: absolute;
+  display: grid;
+  place-items: center;
+  border-radius: 999px;
+  box-shadow: 0 18px 30px rgba(225, 178, 151, 0.2);
+  animation: floaty 4.8s ease-in-out infinite;
+  border: 4px solid #6b4d47;
+}
+.mascot-bunny { left: 44px; bottom: 26px; width: 164px; height: 174px; background: linear-gradient(180deg, #fff0bf 0%, #ffe69f 100%); }
+.mascot-kitty { right: 46px; bottom: 24px; width: 184px; height: 164px; background: linear-gradient(180deg, #fcfdff 0%, #f5f2ff 100%); animation-delay: -1.6s; }
+.ear {
+  position: absolute;
+  top: -58px;
+  width: 42px;
+  height: 100px;
+  background: #fff4cf;
+  border-radius: 999px;
+  border: 4px solid #6b4d47;
+}
+.ear::after { content: ""; position: absolute; inset: 13px 10px; border-radius: 999px; background: rgba(255, 194, 204, 0.75); }
+.ear-left { left: 24px; transform: rotate(-10deg); }
+.ear-right { right: 24px; transform: rotate(10deg); }
+.face { position: relative; width: 78px; height: 54px; }
+.eye { position: absolute; top: 2px; width: 11px; height: 16px; border-radius: 999px; background: #5c3b2e; }
+.eye:first-child { left: 12px; }
+.eye:nth-child(2) { right: 12px; }
+.nose { position: absolute; left: 50%; top: 16px; width: 10px; height: 8px; background: #5c3b2e; border-radius: 999px; transform: translateX(-50%); }
+.mouth { position: absolute; left: 50%; bottom: 10px; width: 22px; height: 10px; transform: translateX(-50%); border-bottom: 3px solid #f4a186; border-radius: 0 0 24px 24px; }
+.cheek { position: absolute; bottom: 4px; width: 18px; height: 12px; border-radius: 999px; background: rgba(255, 170, 182, 0.68); }
+.cheek-left { left: 0; }
+.cheek-right { right: 0; }
+.kitty-ears { position: absolute; top: -8px; width: 54px; height: 44px; background: #7da0d7; border: 4px solid #6b4d47; clip-path: polygon(50% 0%, 0% 100%, 100% 100%); }
+.kitty-ear-left { left: 18px; transform: rotate(-8deg); }
+.kitty-ear-right { right: 18px; transform: rotate(8deg); }
+.kitty-cap { position: absolute; top: -4px; left: 50%; width: 110px; height: 46px; background: #7da0d7; border: 4px solid #6b4d47; border-radius: 0 0 60px 60px; transform: translateX(-50%); }
+.cloud { position: absolute; width: 96px; height: 36px; background: rgba(255, 255, 255, 0.92); border-radius: 999px; }
+.cloud::before, .cloud::after { content: ""; position: absolute; bottom: 8px; border-radius: 50%; background: rgba(255, 255, 255, 0.92); }
+.cloud::before { left: 10px; width: 30px; height: 30px; }
+.cloud::after { right: 10px; width: 42px; height: 42px; }
+.cloud-left { top: 20px; left: 18px; }
+.cloud-right { top: 12px; right: 24px; transform: scale(0.92); }
+.camera { position: absolute; left: 50%; bottom: 54px; width: 70px; height: 42px; transform: translateX(-50%); border-radius: 10px; background: #667686; border: 4px solid #6b4d47; box-shadow: 0 10px 20px rgba(90, 102, 126, 0.22); }
+.camera::before { content: ""; position: absolute; left: 50%; top: 50%; width: 24px; height: 24px; transform: translate(-50%, -50%); border-radius: 50%; background: #dce7f6; border: 4px solid #495564; }
+.camera::after { content: ""; position: absolute; top: -10px; left: 10px; width: 22px; height: 12px; border-radius: 8px 8px 0 0; background: #667686; border: 4px solid #6b4d47; border-bottom: 0; }
+.spark { position: absolute; border-radius: 999px; opacity: 0.9; }
+.spark-one { left: 39%; top: 20%; width: 16px; height: 16px; background: var(--pink); }
+.spark-two { right: 14%; bottom: 16%; width: 18px; height: 18px; background: var(--mint); }
+.spark-three { left: 26%; top: 58%; width: 14px; height: 14px; background: var(--sky); }
+.content-layout { display: grid; grid-template-columns: minmax(280px, 360px) minmax(0, 1fr); gap: 22px; margin-top: 26px; align-items: start; }
+.card { background: var(--card); border: 1px solid rgba(255, 255, 255, 0.7); border-radius: 30px; box-shadow: var(--shadow); backdrop-filter: blur(16px); }
+.timer-panel, .category-card { padding: 24px; }
+.panel-header, .section-heading, .category-top { display: flex; justify-content: space-between; align-items: start; gap: 16px; }
+.panel-header h2, .section-heading h2 { font-size: clamp(1.5rem, 3vw, 2.2rem); }
+.timer-stage { padding: 28px 0 24px; }
+.progress-ring {
+  --progress: 0;
+  display: grid;
+  place-items: center;
+  width: min(100%, 290px);
+  aspect-ratio: 1;
+  margin: 0 auto;
+  padding: 16px;
+  border-radius: 50%;
+  background: conic-gradient(from -90deg, #ff9a8c calc(var(--progress) * 1%), rgba(255, 214, 168, 0.48) calc(var(--progress) * 1%), rgba(255, 255, 255, 0.7) 100%);
+  transition: background 0.35s ease;
+}
+.progress-core {
+  display: grid;
+  place-items: center;
+  text-align: center;
+  width: 100%;
+  height: 100%;
+  padding: 24px;
+  border-radius: 50%;
+  background: linear-gradient(180deg, rgba(255, 253, 250, 0.98), rgba(255, 245, 238, 0.96));
+}
+.timer-label, .timer-note { margin: 0; line-height: 1.5; }
+.timer-display { margin: 12px 0; font-size: clamp(2.4rem, 8vw, 4.1rem); font-weight: 700; letter-spacing: 0.04em; }
+.panel-actions { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+.ghost-button, .preset-button {
+  border: 0;
+  cursor: pointer;
+  transition: transform 0.2s ease, box-shadow 0.2s ease, background 0.2s ease, opacity 0.2s ease;
+}
+.ghost-button { padding: 14px 18px; border-radius: 18px; color: var(--text); background: rgba(255, 255, 255, 0.95); box-shadow: 0 12px 22px rgba(226, 184, 162, 0.18); }
+.ghost-button:disabled { cursor: not-allowed; opacity: 0.55; }
+.ghost-button:not(:disabled):hover, .preset-button:hover { transform: translateY(-2px); box-shadow: 0 14px 26px rgba(224, 168, 141, 0.22); }
+.section-heading { margin-bottom: 16px; }
+.section-text { max-width: 30ch; margin: 0; line-height: 1.7; }
+.category-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 18px; }
+.category-card { position: relative; overflow: hidden; background: linear-gradient(180deg, var(--card-strong), rgba(255, 255, 255, 0.75)), linear-gradient(135deg, rgba(255, 182, 178, 0.1), rgba(204, 239, 220, 0.08)); }
+.category-card::after { content: ""; position: absolute; width: 140px; height: 140px; border-radius: 50%; background: rgba(255, 255, 255, 0.32); right: -40px; bottom: -42px; }
+.category-card h3 { font-size: 1.45rem; }
+.category-icon { display: grid; place-items: center; width: 56px; height: 56px; border-radius: 18px; background: rgba(255, 255, 255, 0.82); box-shadow: 0 10px 20px rgba(226, 184, 162, 0.16); font-size: 1.5rem; }
+.category-description { margin: 14px 0 18px; min-height: 48px; line-height: 1.7; }
+.preset-list { display: flex; flex-wrap: wrap; gap: 10px; }
+.preset-button { position: relative; z-index: 1; min-width: 92px; padding: 12px 16px; border-radius: 16px; color: var(--text); background: rgba(255, 255, 255, 0.92); box-shadow: 0 10px 16px rgba(224, 178, 154, 0.14); }
+.preset-button strong, .preset-button span { display: block; }
+.preset-button strong { font-size: 1rem; }
+.preset-button span { margin-top: 4px; font-size: 0.78rem; color: var(--muted); }
+.category-card[data-tone="book"] { background: linear-gradient(180deg, rgba(255, 248, 236, 0.98), rgba(255, 255, 255, 0.78)), linear-gradient(135deg, rgba(255, 214, 168, 0.14), rgba(255, 240, 168, 0.08)); }
+.category-card[data-tone="piano"] { background: linear-gradient(180deg, rgba(241, 251, 255, 0.98), rgba(255, 255, 255, 0.78)), linear-gradient(135deg, rgba(213, 234, 255, 0.16), rgba(204, 239, 220, 0.08)); }
+.category-card[data-tone="workout"] { background: linear-gradient(180deg, rgba(255, 244, 242, 0.98), rgba(255, 255, 255, 0.78)), linear-gradient(135deg, rgba(255, 182, 178, 0.18), rgba(255, 214, 168, 0.08)); }
+.category-card[data-tone="other"] { background: linear-gradient(180deg, rgba(246, 255, 249, 0.98), rgba(255, 255, 255, 0.78)), linear-gradient(135deg, rgba(204, 239, 220, 0.16), rgba(213, 234, 255, 0.08)); }
+@keyframes floaty { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-10px); } }
+@media (max-width: 960px) {
+  .hero, .content-layout { grid-template-columns: 1fr; }
+  .hero-art { min-height: 240px; }
+  .category-grid { grid-template-columns: 1fr; }
+  .section-text { max-width: none; }
+}
+@media (max-width: 640px) {
+  .page-shell { width: min(100% - 20px, 1180px); padding-top: 20px; }
+  .hero, .timer-panel, .category-card { padding: 20px; border-radius: 24px; }
+  .panel-header, .section-heading { flex-direction: column; }
+  .hero h1 { max-width: none; }
+  .mascot-bunny { left: 14px; bottom: 18px; width: 132px; height: 144px; }
+  .mascot-kitty { right: 12px; bottom: 18px; width: 146px; height: 130px; }
+  .camera { bottom: 40px; width: 56px; height: 34px; }
+  .panel-actions { grid-template-columns: 1fr; }
+  .preset-button { flex: 1 1 calc(50% - 10px); min-width: 0; }
+}
+    </style>
+  </head>
+  <body>
+    <div class="page-shell">
+      <header class="hero">
+        <div class="hero-copy">
+          <p class="eyebrow">Soft Timer Club</p>
+          <h1>今天想做什么，点一下就开始</h1>
+          <p class="hero-text">
+            把读书、练琴、健身和其他日常小目标，变成一页就能快速启动的可爱计时器。
+          </p>
+        </div>
+
+        <div class="hero-art" aria-hidden="true">
+          <div class="cloud cloud-left"></div>
+          <div class="cloud cloud-right"></div>
+          <div class="mascot mascot-bunny">
+            <span class="ear ear-left"></span>
+            <span class="ear ear-right"></span>
+            <span class="face">
+              <span class="eye"></span>
+              <span class="eye"></span>
+              <span class="nose"></span>
+              <span class="mouth"></span>
+              <span class="cheek cheek-left"></span>
+              <span class="cheek cheek-right"></span>
+            </span>
+          </div>
+          <div class="mascot mascot-kitty">
+            <span class="kitty-ears kitty-ear-left"></span>
+            <span class="kitty-ears kitty-ear-right"></span>
+            <span class="kitty-cap"></span>
+            <span class="face">
+              <span class="eye"></span>
+              <span class="eye"></span>
+              <span class="nose"></span>
+              <span class="mouth"></span>
+              <span class="cheek cheek-left"></span>
+              <span class="cheek cheek-right"></span>
+            </span>
+          </div>
+          <div class="camera">
+            <span class="camera-lens"></span>
+          </div>
+          <div class="spark spark-one"></div>
+          <div class="spark spark-two"></div>
+          <div class="spark spark-three"></div>
+        </div>
+      </header>
+
+      <main class="content-layout">
+        <section class="timer-panel card" aria-labelledby="timer-title">
+          <div class="panel-header">
+            <div>
+              <p class="section-label">Now Timing</p>
+              <h2 id="timer-title">准备开始一个可爱专注时段</h2>
+            </div>
+            <div class="status-pill" id="timerStatus">待机中</div>
+          </div>
+
+          <div class="timer-stage">
+            <div class="progress-ring" id="progressRing">
+              <div class="progress-core">
+                <p class="timer-label" id="activeLabel">选择一个分类和时长</p>
+                <p class="timer-display" id="timeDisplay">00:00</p>
+                <p class="timer-note" id="timerNote">点一个按钮就会立刻开始计时。</p>
+              </div>
+            </div>
+          </div>
+
+          <div class="panel-actions">
+            <button class="ghost-button" id="pauseButton" type="button" disabled>暂停</button>
+            <button class="ghost-button" id="resetButton" type="button" disabled>重置</button>
+          </div>
+        </section>
+
+        <section class="category-section">
+          <div class="section-heading">
+            <div>
+              <p class="section-label">Pick One</p>
+              <h2>想做什么就快速点一下</h2>
+            </div>
+            <p class="section-text">每个类别都准备了几段常用时长，不用思考太多，直接开始就好。</p>
+          </div>
+          <div class="category-grid" id="categoryGrid"></div>
+        </section>
+      </main>
+    </div>
+
+    <template id="categoryTemplate">
+      <article class="category-card card">
+        <div class="category-top">
+          <div>
+            <p class="category-kicker"></p>
+            <h3></h3>
+          </div>
+          <div class="category-icon"></div>
+        </div>
+        <p class="category-description"></p>
+        <div class="preset-list"></div>
+      </article>
+    </template>
+
+    <script>
+const timerCategories = [
+  { tone: "book", kicker: "Reading", title: "读书计时器", icon: "📚", description: "适合晨读、睡前阅读，或想安静把一本书看进去的时候。", presets: [ { minutes: 15, label: "轻松翻一会" }, { minutes: 25, label: "番茄阅读" }, { minutes: 40, label: "沉浸时段" }, { minutes: 60, label: "深度阅读" } ] },
+  { tone: "piano", kicker: "Piano", title: "练钢琴计时器", icon: "🎹", description: "练音阶、过曲子、拆片段，一点就开始今天的练琴节奏。", presets: [ { minutes: 10, label: "热手指" }, { minutes: 20, label: "技巧练习" }, { minutes: 35, label: "主练时段" }, { minutes: 50, label: "完整练琴" } ] },
+  { tone: "workout", kicker: "Workout", title: "健身计时器", icon: "💪", description: "适合居家运动、拉伸、核心训练，给自己一个刚刚好的冲劲。", presets: [ { minutes: 8, label: "快速唤醒" }, { minutes: 15, label: "燃脂一下" }, { minutes: 30, label: "认真训练" }, { minutes: 45, label: "完整运动" } ] },
+  { tone: "other", kicker: "Anything", title: "其他计时器", icon: "✨", description: "写日记、收房间、做手账、发呆整理思绪，也都能快速计时。", presets: [ { minutes: 5, label: "马上开始" }, { minutes: 12, label: "小目标" }, { minutes: 20, label: "专注一下" }, { minutes: 30, label: "刚刚好" } ] },
+];
+
+const categoryGrid = document.querySelector("#categoryGrid");
+const categoryTemplate = document.querySelector("#categoryTemplate");
+const progressRing = document.querySelector("#progressRing");
+const activeLabel = document.querySelector("#activeLabel");
+const timeDisplay = document.querySelector("#timeDisplay");
+const timerStatus = document.querySelector("#timerStatus");
+const timerNote = document.querySelector("#timerNote");
+const pauseButton = document.querySelector("#pauseButton");
+const resetButton = document.querySelector("#resetButton");
+
+let timerId = null;
+let endTimestamp = 0;
+let totalSeconds = 0;
+let remainingSeconds = 0;
+let isPaused = false;
+let activeTimerMeta = null;
+
+renderCategories();
+renderIdleState();
+
+pauseButton.addEventListener("click", handlePauseToggle);
+resetButton.addEventListener("click", resetTimer);
+
+function renderCategories() {
+  timerCategories.forEach((category) => {
+    const card = categoryTemplate.content.firstElementChild.cloneNode(true);
+    card.dataset.tone = category.tone;
+    card.querySelector(".category-kicker").textContent = category.kicker;
+    card.querySelector("h3").textContent = category.title;
+    card.querySelector(".category-icon").textContent = category.icon;
+    card.querySelector(".category-description").textContent = category.description;
+    const presetList = card.querySelector(".preset-list");
+    category.presets.forEach((preset) => {
+      const button = document.createElement("button");
+      button.type = "button";
+      button.className = "preset-button";
+      button.innerHTML = `<strong>${preset.minutes} 分钟</strong><span>${preset.label}</span>`;
+      button.addEventListener("click", () => startTimer(category, preset));
+      presetList.appendChild(button);
+    });
+    categoryGrid.appendChild(card);
+  });
+}
+
+function startTimer(category, preset) {
+  clearInterval(timerId);
+  activeTimerMeta = { categoryTitle: category.title, presetLabel: preset.label };
+  totalSeconds = preset.minutes * 60;
+  remainingSeconds = totalSeconds;
+  endTimestamp = Date.now() + totalSeconds * 1000;
+  isPaused = false;
+  timerId = setInterval(syncTimer, 250);
+  syncTimer();
+}
+
+function syncTimer() {
+  if (isPaused) return;
+  const secondsLeft = Math.max(0, Math.ceil((endTimestamp - Date.now()) / 1000));
+  remainingSeconds = secondsLeft;
+  renderActiveState();
+  if (secondsLeft <= 0) {
+    clearInterval(timerId);
+    timerId = null;
+    finishTimer();
+  }
+}
+
+function handlePauseToggle() {
+  if (!activeTimerMeta) return;
+  if (isPaused) {
+    isPaused = false;
+    endTimestamp = Date.now() + remainingSeconds * 1000;
+    timerId = setInterval(syncTimer, 250);
+    pauseButton.textContent = "暂停";
+    timerStatus.textContent = "进行中";
+    timerNote.textContent = "继续陪你慢慢完成这段时间。";
+    return;
+  }
+  isPaused = true;
+  clearInterval(timerId);
+  timerId = null;
+  pauseButton.textContent = "继续";
+  timerStatus.textContent = "已暂停";
+  timerNote.textContent = "先停一下也没关系，准备好再继续。";
+}
+
+function resetTimer() {
+  clearInterval(timerId);
+  timerId = null;
+  endTimestamp = 0;
+  totalSeconds = 0;
+  remainingSeconds = 0;
+  isPaused = false;
+  activeTimerMeta = null;
+  renderIdleState();
+}
+
+function finishTimer() {
+  playChime();
+  progressRing.style.setProperty("--progress", "100");
+  activeLabel.textContent = "这轮完成啦";
+  timeDisplay.textContent = "00:00";
+  timerStatus.textContent = "已完成";
+  timerNote.textContent = "休息一下，或者再点一个新的时段继续吧。";
+  pauseButton.disabled = true;
+  resetButton.disabled = false;
+  pauseButton.textContent = "暂停";
+  document.title = "计时完成啦";
+}
+
+function renderIdleState() {
+  activeLabel.textContent = "选择一个分类和时长";
+  timeDisplay.textContent = "00:00";
+  timerStatus.textContent = "待机中";
+  timerNote.textContent = "点一个按钮就会立刻开始计时。";
+  progressRing.style.setProperty("--progress", "0");
+  pauseButton.disabled = true;
+  resetButton.disabled = true;
+  pauseButton.textContent = "暂停";
+  document.title = "可爱计时器小工具";
+}
+
+function renderActiveState() {
+  const progressValue = totalSeconds > 0 ? ((totalSeconds - remainingSeconds) / totalSeconds) * 100 : 0;
+  progressRing.style.setProperty("--progress", progressValue.toFixed(2));
+  activeLabel.textContent = `${activeTimerMeta.categoryTitle} · ${activeTimerMeta.presetLabel}`;
+  timeDisplay.textContent = formatTime(remainingSeconds);
+  timerStatus.textContent = "进行中";
+  timerNote.textContent = "已经开始计时，慢慢做完眼前这件事吧。";
+  pauseButton.disabled = false;
+  resetButton.disabled = false;
+  pauseButton.textContent = "暂停";
+  document.title = `${formatTime(remainingSeconds)} · ${activeTimerMeta.categoryTitle}`;
+}
+
+function formatTime(total) {
+  const minutes = Math.floor(total / 60).toString().padStart(2, "0");
+  const seconds = (total % 60).toString().padStart(2, "0");
+  return `${minutes}:${seconds}`;
+}
+
+function playChime() {
+  const audioContext = new window.AudioContext();
+  const oscillator = audioContext.createOscillator();
+  const gainNode = audioContext.createGain();
+  oscillator.type = "triangle";
+  oscillator.frequency.setValueAtTime(660, audioContext.currentTime);
+  oscillator.frequency.exponentialRampToValueAtTime(880, audioContext.currentTime + 0.35);
+  gainNode.gain.setValueAtTime(0.001, audioContext.currentTime);
+  gainNode.gain.exponentialRampToValueAtTime(0.16, audioContext.currentTime + 0.03);
+  gainNode.gain.exponentialRampToValueAtTime(0.001, audioContext.currentTime + 0.8);
+  oscillator.connect(gainNode);
+  gainNode.connect(audioContext.destination);
+  oscillator.start();
+  oscillator.stop(audioContext.currentTime + 0.8);
+}
+    </script>
+  </body>
+</html>
